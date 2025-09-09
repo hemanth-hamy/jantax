@@ -1,7 +1,8 @@
-﻿streamlit
-openai
-google-generativeai
+﻿fastapi
+uvicorn
+streamlit
 pandas
 fpdf
-SpeechRecognition
-gtts
+openai
+google-generativeai
+gTTS
