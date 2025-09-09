@@ -1,0 +1,7 @@
+﻿streamlit
+openai
+google-generativeai
+pandas
+fpdf
+SpeechRecognition
+gtts
