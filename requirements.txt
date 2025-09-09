@@ -1,8 +1,10 @@
-﻿fastapi
+﻿streamlit
+fastapi
 uvicorn
-streamlit
-pandas
-fpdf
+pydantic
 openai
 google-generativeai
-gTTS
+whisper
+torch
+fpdf
+pandas

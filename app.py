@@ -1,48 +1,63 @@
-﻿import streamlit as st, requests, os
+﻿import streamlit as st
+import requests
 
-BASE_URL = os.getenv("BASE_URL","http://localhost:8000")
-st.set_page_config(page_title="JanTax", page_icon="🌍", layout="wide")
+BASE = "https://jantax.onrender.com"
+
+st.sidebar.title("📌 Navigation")
+page = st.sidebar.radio("Go to:", ["Home", "ITR Filing", "GST Filing", "TDS Filing", "PT Filing", "Voice Assistant"])
+
 st.title("🌍 JanTax – Social Justice Edition")
+st.write("AI-powered Indian Tax Helper: ITR + GST + TDS + PT drafts + Voice")
 
-choice = st.sidebar.radio("Choose Module",["Home","Voice","ITR","GST","TDS","PT","Help","Contact"])
+def download_file(path, label):
+    with open(path, "rb") as f:
+        st.download_button(label, f, file_name=path)
 
-if choice=="Home":
-    st.info("AI-powered Indian Tax Helper: ITR + GST + TDS + PT")
-elif choice=="Voice":
-    st.header("🎤 Voice Assistant")
-    st.write("Upload voice in Hindi/Kannada/Tamil/Telugu")
-    file=st.file_uploader("Upload voice",type=["wav","mp3"])
-    if file and st.button("Transcribe + Draft"):
-        res=requests.post(f"{BASE_URL}/voice",files={"file":file.getvalue()})
-        st.json(res.json())
-elif choice=="ITR":
-    st.header("🧾 ITR Filing")
-    inc=st.number_input("Income",0)
-    ded=st.number_input("Deductions",0)
-    reg=st.selectbox("Regime",["old","new"])
+if page == "Home":
+    st.info("Welcome to JanTax Ultimate. Choose a filing tab.")
+
+elif page == "ITR Filing":
+    income = st.number_input("Income", min_value=0)
+    deductions = st.number_input("Deductions", min_value=0)
     if st.button("Prepare ITR Draft"):
-        res=requests.post(f"{BASE_URL}/itrfiling",json={"income":inc,"deductions":ded,"regime":reg})
-        st.json(res.json())
-elif choice=="GST":
-    st.header("💰 GST Filing")
-    sales=st.number_input("Sales",0)
-    purchases=st.number_input("Purchases",0)
+        r = requests.post(BASE + "/draft/itr", json={"income": income, "deductions": deductions})
+        data = r.json()
+        st.json(data)
+        download_file("ITR_DRAFT.csv", "⬇️ Download CSV")
+        download_file("ITR_DRAFT.txt", "⬇️ Download TXT")
+        download_file("ITR_DRAFT.pdf", "⬇️ Download PDF")
+
+elif page == "GST Filing":
     if st.button("Prepare GST Draft"):
-        res=requests.post(f"{BASE_URL}/gstfiling",json={"sales":sales,"purchases":purchases})
-        st.json(res.json())
-elif choice=="TDS":
-    st.header("💼 TDS Filing")
-    salary=st.number_input("Salary",0)
+        r = requests.post(BASE + "/draft/gst")
+        data = r.json()
+        st.json(data)
+        download_file("GST_DRAFT.csv", "⬇️ Download CSV")
+        download_file("GST_DRAFT.txt", "⬇️ Download TXT")
+        download_file("GST_DRAFT.pdf", "⬇️ Download PDF")
+
+elif page == "TDS Filing":
     if st.button("Prepare TDS Draft"):
-        res=requests.post(f"{BASE_URL}/tdsfiling",json={"salary":salary})
-        st.json(res.json())
-elif choice=="PT":
-    st.header("🏢 PT Filing")
-    employees=st.number_input("Employees",0)
+        r = requests.post(BASE + "/draft/tds")
+        data = r.json()
+        st.json(data)
+        download_file("TDS_DRAFT.csv", "⬇️ Download CSV")
+        download_file("TDS_DRAFT.txt", "⬇️ Download TXT")
+        download_file("TDS_DRAFT.pdf", "⬇️ Download PDF")
+
+elif page == "PT Filing":
     if st.button("Prepare PT Draft"):
-        res=requests.post(f"{BASE_URL}/ptfiling",json={"employees":employees})
-        st.json(res.json())
-elif choice=="Help":
-    st.write("FAQs: support@jantax.ai")
-elif choice=="Contact":
-    st.write("📞 +91-99999-99999")
+        r = requests.post(BASE + "/draft/pt")
+        data = r.json()
+        st.json(data)
+        download_file("PT_DRAFT.csv", "⬇️ Download CSV")
+        download_file("PT_DRAFT.txt", "⬇️ Download TXT")
+        download_file("PT_DRAFT.pdf", "⬇️ Download PDF")
+
+elif page == "Voice Assistant":
+    st.info("Upload a voice file (WAV/MP3) to transcribe.")
+    audio_file = st.file_uploader("Upload voice", type=["wav", "mp3"])
+    if audio_file and st.button("Transcribe"):
+        files = {"file": audio_file.getvalue()}
+        r = requests.post(BASE + "/voice", files=files)
+        st.json(r.json())
